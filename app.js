@@ -24,25 +24,26 @@ app.use(bodyParser.json());
 app.post('/api/sauces', (req, res, next) => {
   delete req.body._id;
   const sauce = new Sauce({
-    userId: "test sauce",
-  name: "test sauce",
-  imageUrl: "test sauce",
-  manufacturer: "test sauce",
-  description: "test sauce",
-  mainPepper: "test sauce",
-  imageUrl: "test sauce",
-  heat: 1,
-  likes: 1,
-  dislikes: 1,
-  usersLiked: ["test sauce"],
-  usersDisliked: ["test sauce"]
+    
   });
   sauce.save()
     .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
     .catch(error => res.status(400).json({ error }));
 });
 
-app.use('/api/sauces', (req, res, next) => {
+app.put('/api/sauces/:id', (req, res, next) => {
+  Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
+    .catch(error => res.status(400).json({ error }));
+});
+
+app.delete('/api/sauces/:id', (req, res, next) => {
+  Sauce.deleteOne({ _id: req.params.id })
+    .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
+    .catch(error => res.status(400).json({ error }));
+});
+
+app.get('/api/sauces', (req, res, next) => {
   Sauce.find()
     .then(things => res.status(200).json(things))
     .catch(error => res.status(400).json({ error }));
