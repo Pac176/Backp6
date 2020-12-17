@@ -11,7 +11,9 @@ const path = require('path');
 mongoose.connect('mongodb+srv://Pascal:openclasserooms@cluster0.boxdf.mongodb.net/soPeckoko?retryWrites=true&w=majority',
   {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true
+    
   })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
