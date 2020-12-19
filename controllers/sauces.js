@@ -80,7 +80,7 @@ exports.likeSauce = (req, res, next) => {
                 _id: req.params.id
               })
               .then(sauces => res.status(httpStatus.OK).json({Message : 'Ton avis est annulé'}))
-              .catch(error => res.status(BAD_REQUEST).json({ error }));
+              .catch(error => res.status(httpStatus.BAD_REQUEST).json({ error }));
           } if (sauce.usersDisliked.includes(req.body.userId)) {
             Sauce.updateOne({ _id: req.params.id },
               {
@@ -88,7 +88,7 @@ exports.likeSauce = (req, res, next) => {
                 $pull: { usersDisliked: req.body.userId }
               })
               .then(sauces => res.status(httpStatus.OK).json({Message : 'Ton avis est annulé'}))
-              .catch(error => res.status(BAD_REQUEST).json({ error }));
+              .catch(error => res.status(httpStatus.BAD_REQUEST).json({ error }));
           }
         })
     break;
@@ -101,8 +101,8 @@ exports.likeSauce = (req, res, next) => {
           $push: { usersLiked: req.body.userId },
           _id: req.params.id
         })
-          .then(() => { res.status(201).json({ Message: 'Ton avis positif a été pris en compte!' }) })
-          .catch((error) => { res.status(400).json({ error }) });
+          .then(() => { res.status(httpStatus.CREATED).json({ Message: 'Ton avis positif a été pris en compte!' }) })
+          .catch((error) => { res.status(httpStatus.BAD_REQUEST).json({ error }) });
       }
       break;
 
@@ -114,8 +114,8 @@ exports.likeSauce = (req, res, next) => {
         $push: { usersDisliked: req.body.userId },
         _id: req.params.id
       })
-        .then(() => { res.status(201).json({Message:'Ton avis négatif a été pris en compte!' }) })
-        .catch((error) => { res.status(400).json({ error }) });
+        .then(() => { res.status(httpStatus.CREATED).json({Message:'Ton avis négatif a été pris en compte!' }) })
+        .catch((error) => { res.status(httpStatus.BAD_REQUEST).json({ error }) });
       break;
 
       // L'identifiant del'utilisateur doit être ajouté ou supprimé du tableau approprié, en gardant une trace de ses préférences et en l'empêchant d'aimer ou de ne pas aimer la même sauce plusieurs fois. Nombre total de 'j'aime' et de 'je n'aime pas' à mettre à jour avec chaque 'j'aime'.
