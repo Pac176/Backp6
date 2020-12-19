@@ -13,7 +13,7 @@ mongoose.connect('mongodb+srv://Pascal:openclasserooms@cluster0.boxdf.mongodb.ne
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
-    
+
   })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
@@ -29,7 +29,7 @@ app.use(bodyParser.json());
 
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use("/api/sauces",saucesRoutes)
-app.use('/api/auth', userRoutes);
+app.use('/api/sauces',saucesRoutes)
+app.use('/api/auth', userRoutes)
 
 module.exports = app
