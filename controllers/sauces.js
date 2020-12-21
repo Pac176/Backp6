@@ -61,31 +61,56 @@ exports.getAllSauce = (req, res, next) => {
 };
 
 exports.likeSauce = (req, res, next) => {
-  console.log(req.body);
+  const cancelOpinionSuccessMessage = {message :'ton avis est annulé'};
+  const opinionSuccessMessage = { message: 'Ton avis a été pris en compte!' };
+  const badRequestMessage = { message: "la requete n'est pas valide" };
+  const fordiddenRepetitionMessage = { message: 'vote deja pris en compte, annule ton vote pour changer' }
+  const pushDislike = {  usersDisliked: req.body.userId }
+  const pushLike = { usersLiked: req.body.userId }
+  function push(increment, likeOrDislike) {
+          Sauce.updateOne({ _id: req.params.id },
+              {
+                $inc: increment,
+                $push: likeOrDislike
+              })
+              .then(() => res.status(httpStatus.OK).json(opinionSuccessMessage))
+              .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json(fordiddenRepetitionMessage));
+  }
+  function pull(increment, likeOrDislike) {
+          Sauce.updateOne({ _id: req.params.id },
+              {
+                $inc: increment,
+                $push: likeOrDislike
+              })
+              .then(() => res.status(httpStatus.OK).json(cancelOpinionSuccessMessage))
+              .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json(badRequestMessage));
+  }
 
   // En fonction du like de la requete j'ajoute le user dans le tableau et je comptabilise les likes
   switch (req.body.like) {
     /* Si j'aime = 0, l'utilisateur annule ce qu'il aime ou ce qu'il n'aime pas. Suppression du user des tableaux array usersliked et userdisliked, -1  sur le likes ou dislikes */
     case 0:
-      /* Pour eviter les doublons je dois interroger les 2 tableaux de la sauce selectionée et voir si user est deja dedans, si c'est le cas je dois le supprimer du tableau enlever un like ou unlike. */
+       /* Pour eviter les doublons je dois interroger les 2 tableaux de la sauce selectionée et voir si user est deja dedans, si c'est le cas je dois le supprimer du tableau enlever un like ou unlike. */
       Sauce.findOne({ _id: req.params.id })
         .then((sauce) => {
           if (sauce.usersLiked.includes(req.body.userId)) {
-            Sauce.updateOne({ _id: req.params.id },
-              {
-                $inc: { likes: -1 },
-                $pull: { usersLiked: req.body.userId }
-              })
-              .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
-              .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
+            pull({ likes: -1 },pushLike)
+            // Sauce.updateOne({ _id: req.params.id },
+            //   {
+            //     $inc: { likes: -1 },
+            //     $pull: pushLike
+            //   })
+            //   .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
+            //   .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
           } else if (sauce.usersDisliked.includes(req.body.userId)) {
-            Sauce.updateOne({ _id: req.params.id },
-              {
-                $inc: { dislikes: -1 },
-                $pull: { usersDisliked: req.body.userId }
-              })
-              .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
-              .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
+            pull({ dislikes: -1 },pushDislike)
+            // Sauce.updateOne({ _id: req.params.id },
+            //   {
+            //     $inc: { dislikes: -1 },
+            //     $pull: pushDislike
+            //   })
+            //   .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
+            //   .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
           } else {
             res.status(httpStatus.BAD_REQUEST).json({ message: 'tu ne peux plus annuler ton vote banane!!' });
           }
@@ -96,13 +121,14 @@ exports.likeSauce = (req, res, next) => {
       Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
           if (!(sauce.usersLiked.includes(req.body.userId)) && (!(sauce.usersDisliked.includes(req.body.userId)))) {
-            Sauce.updateOne({ _id: req.params.id },
-              {
-                $inc: { likes: +1 },
-                $push: { usersLiked: req.body.userId }
-              })
-              .then(() => { res.status(httpStatus.CREATED).json({ Message: 'Ton avis a été pris en compte!' }) })
-              .catch((error) => { res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error }) });
+            push({ likes: +1 },pushLike)
+            // Sauce.updateOne({ _id: req.params.id },
+            //   {
+            //     $inc: { likes: +1 },
+            //     $push: pushLike
+            //   })
+            //   .then(() => { res.status(httpStatus.CREATED).json({ Message: 'Ton avis a été pris en compte!' }) })
+            //   .catch((error) => { res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error }) });
           } else {
             res.status(httpStatus.OK).json({ message: 'Deja voté' });
           }
@@ -118,13 +144,14 @@ exports.likeSauce = (req, res, next) => {
       Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
           if (!(sauce.usersLiked.includes(req.body.userId)) && (!(sauce.usersDisliked.includes(req.body.userId)))) {
-            Sauce.updateOne({ _id: req.params.id },
-              {
-                $inc: { dislikes: +1 },
-                $push: { usersDisliked: req.body.userId }
-              })
-              .then(() => { res.status(httpStatus.CREATED).json({ Message: 'Ton avis a été pris en compte!' }) })
-              .catch((error) => { res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error }) });
+            push({ dislikes: +1 },pushDislike)
+            // Sauce.updateOne({ _id: req.params.id },
+            //   {
+            //     $inc: { dislikes: +1 },
+            //     $push: pushDislike
+            //   })
+            //   .then(() => { res.status(httpStatus.CREATED).json({ Message: 'Ton avis a été pris en compte!' }) })
+            //   .catch((error) => { res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error }) });
           } else {
             res.status(httpStatus.OK).json({ message: 'Deja voté' });
           }
