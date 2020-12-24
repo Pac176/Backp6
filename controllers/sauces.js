@@ -65,8 +65,8 @@ exports.likeSauce = (req, res, next) => {
   const opinionSuccessMessage = { message: 'Ton avis a été pris en compte!' };
   const badRequestMessage = { message: "la requete n'est pas valide" };
   const fordiddenRepetitionMessage = { message: 'vote deja pris en compte, annule ton vote pour changer' }
-  const dislike = {  usersDisliked: req.body.userId }
-  const like = { usersLiked: req.body.userId }
+  const pushDislike = {  usersDisliked: req.body.userId }
+  const pushLike = { usersLiked: req.body.userId }
   function push(increment, likeOrDislike) {
           Sauce.updateOne({ _id: req.params.id },
               {
@@ -80,7 +80,7 @@ exports.likeSauce = (req, res, next) => {
           Sauce.updateOne({ _id: req.params.id },
               {
                 $inc: increment,
-                $pull: likeOrDislike
+                $push: likeOrDislike
               })
               .then(() => res.status(httpStatus.OK).json(cancelOpinionSuccessMessage))
               .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json(badRequestMessage));
@@ -94,7 +94,7 @@ exports.likeSauce = (req, res, next) => {
       Sauce.findOne({ _id: req.params.id })
         .then((sauce) => {
           if (sauce.usersLiked.includes(req.body.userId)) {
-            pull({ likes: -1 },like)
+            pull({ likes: -1 },pushLike)
             // Sauce.updateOne({ _id: req.params.id },
             //   {
             //     $inc: { likes: -1 },
@@ -103,11 +103,11 @@ exports.likeSauce = (req, res, next) => {
             //   .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
             //   .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
           } else if (sauce.usersDisliked.includes(req.body.userId)) {
-            pull({ dislikes: -1 },dislike)
+            pull({ dislikes: -1 },pushDislike)
             // Sauce.updateOne({ _id: req.params.id },
             //   {
             //     $inc: { dislikes: -1 },
-            //     $pull: {  usersDisliked: req.body.userId }
+            //     $pull: pushDislike
             //   })
             //   .then(() => res.status(httpStatus.OK).json({ Message: 'Ton avis est annulé' }))
             //   .catch(() => res.status(httpStatus.httpStatus.BAD_REQUEST).json({ error: "annule d'abord ton j'aime" }));
@@ -121,7 +121,7 @@ exports.likeSauce = (req, res, next) => {
       Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
           if (!(sauce.usersLiked.includes(req.body.userId)) && (!(sauce.usersDisliked.includes(req.body.userId)))) {
-            push({ likes: +1 },like)
+            push({ likes: +1 },pushLike)
             // Sauce.updateOne({ _id: req.params.id },
             //   {
             //     $inc: { likes: +1 },
@@ -144,7 +144,7 @@ exports.likeSauce = (req, res, next) => {
       Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
           if (!(sauce.usersLiked.includes(req.body.userId)) && (!(sauce.usersDisliked.includes(req.body.userId)))) {
-            push({ dislikes: +1 },dislike)
+            push({ dislikes: +1 },pushDislike)
             // Sauce.updateOne({ _id: req.params.id },
             //   {
             //     $inc: { dislikes: +1 },
