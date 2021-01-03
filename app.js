@@ -7,7 +7,7 @@ const app = express();
 const path = require('path');
 require("dotenv").config();
 
-console.log(process.env.DB_CONNECT)
+
 mongoose.connect(process.env.DB_CONNECT,
   {
     useNewUrlParser: true,
