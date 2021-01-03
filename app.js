@@ -5,10 +5,10 @@ const userRoutes = require('./routes/user');
 const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
+require("dotenv").config();
 
-
-
-mongoose.connect('mongodb+srv://Pascal:openclasserooms@cluster0.boxdf.mongodb.net/soPeckoko?retryWrites=true&w=majority',
+console.log(process.env.DB_CONNECT)
+mongoose.connect(process.env.DB_CONNECT,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
