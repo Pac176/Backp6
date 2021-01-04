@@ -8,15 +8,14 @@ const path = require('path');
 require("dotenv").config();
 
 
-mongoose.connect(process.env.DB_CONNECT,
-  {
+mongoose
+  .connect(process.env.DB_CONNECT_USER, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true
-
+    useCreateIndex: true,
   })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
+  .then(() => console.log("Connexion à MongoDB réussie !"))
+  .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
