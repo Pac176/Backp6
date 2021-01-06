@@ -8,8 +8,7 @@ const path = require('path');
 require("dotenv").config();
 
 
-mongoose
-  .connect(process.env.DB_CONNECT_USER, {
+mongoose.connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
