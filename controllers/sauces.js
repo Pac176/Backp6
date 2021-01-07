@@ -7,13 +7,14 @@ const internalServerErrorMessage = { message: 'internal Server Error' };
 exports.createSauce = async (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
-  const sauce = new Sauce({
-    ...sauceObject,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${
+
+  try {
+    const sauce = new Sauce({
+      ...sauceObject,
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${
       req.file.filename
     }`
-  });
-  try {
+    });
     await sauce.save();
     res.status(httpStatus.CREATED).json({ Message: 'Objet enregistré !' });
   } catch (error) {
@@ -26,42 +27,34 @@ exports.createSauce = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
-  const sauceObject = req.file
-    ? {
+  const sauce = await Sauce.findOne({ _id: req.params.id });
+  const filename = sauce.imageUrl.split('/images/')[1];
+  try {
+    if (req.file) {
+      fs.unlink(`images/${filename}`, () => {
+        'Suppression fichier effectuée!';
+      });
+      const sauceObject = {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${
           req.file.filename
         }`
-      }
-    : { ...req.body };
-
-  try {
-    const sauce = await Sauce.findOne({ _id: req.params.id });
-    const filename = sauce.imageUrl.split('/images/')[1];
-    fs.unlink(`images/${filename}`, async () => {
-      try {
-        await Sauce.updateOne(
-          { _id: req.params.id },
-          { ...sauceObject, _id: req.params.id }
-        );
-        res.status(httpStatus.OK).json({ Message: 'Objet modifié !' });
-      } catch (error) {
-        (error) => {
-          console.log(error.message);
-          res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-        };
-      }
-    });
+      };
+      await Sauce.updateOne(
+        { _id: req.params.id },
+        { ...sauceObject, _id: req.params.id }
+      );
+      res.status(httpStatus.OK).json({ Message: 'Objet modifié !' });
+    } else {
+      await Sauce.updateOne(
+        { _id: req.params.id },
+        { ...JSON.parse(req.body.sauce), _id: req.params.id }
+      );
+      res.status(httpStatus.OK).json({ Message: 'Objet modifié !' });
+    }
   } catch (error) {
-    error =>
-      console.log(error.message);
-    fs.unlink(`images/${req.file.filename}`, () => {
-      console.log('Suppression fichier effectuée!');
-    });
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ error: error.message });
-    ;
+    console.log(error.message);
+    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
   }
 };
 
@@ -79,8 +72,7 @@ exports.deleteSauce = async (req, res, next) => {
       }
     });
   } catch (error) {
-    error =>
-      console.log(error.message);
+    console.log(error.message);
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json(internalServerErrorMessage);
   }
 };
@@ -90,10 +82,8 @@ exports.getOneSauce = async (req, res, next) => {
     const oneSauce = await Sauce.findOne();
     res.status(httpStatus.OK).json(oneSauce);
   } catch (error) {
-    error => {
-      console.log(error.message);
-      res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-    };
+    console.log(error.message);
+    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
   }
 };
 exports.getAllSauce = async (req, res, next) => {
@@ -101,10 +91,8 @@ exports.getAllSauce = async (req, res, next) => {
     const allSauces = await Sauce.find();
     res.status(httpStatus.OK).json(allSauces);
   } catch (error) {
-    error => {
-      console.log(error.message);
-      res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-    };
+    console.log(error.message);
+    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
   }
 };
 
