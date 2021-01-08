@@ -28,7 +28,6 @@ exports.createSauce = async (req, res, next) => {
 
 exports.modifySauce = async (req, res, next) => {
 
-
   async function upload(sauce) {
     await Sauce.updateOne(
       { _id: req.params.id },
@@ -38,18 +37,16 @@ exports.modifySauce = async (req, res, next) => {
       .status(httpStatus.OK)
       .json({ message: "Sauce et/ou image modifiées !" });
   }
-
-  if (req.file && req.body.sauce) {
-
-
-    const sauce = await Sauce.findOne({ _id: req.params.id });
-    const filename = sauce.imageUrl.split('/images/')[1];
-
-
-    fs.unlink(`images/${filename}`, () => {
+  function deleteImage() {
+     fs.unlink(`images/${filename}`, () => {
       console.log('Suppression fichier effectuée!');
     });
+  }
 
+  if (req.file && req.body.sauce) {
+    const sauce = await Sauce.findOne({ _id: req.params.id });
+    const filename = sauce.imageUrl.split('/images/')[1];
+    deleteImage()
     const sauceObject = {
       ...JSON.parse(req.body.sauce),
       imageUrl: `${req.protocol}://${req.get('host')}/images/${
@@ -61,7 +58,6 @@ exports.modifySauce = async (req, res, next) => {
   {
     const sauce = await Sauce.findOne({ _id: req.params.id });
     const filename = sauce.imageUrl.split('/images/')[1];
-
     fs.unlink(`images/${filename}`, () => {
       console.log('Suppression fichier effectuée!');
     });
@@ -71,12 +67,9 @@ exports.modifySauce = async (req, res, next) => {
      }`
     };
     upload(sauceObject);
-
   } else if (!req.file && req.body.sauce) {
-
     const sauceObject = JSON.parse(req.body.sauce);
     upload(sauceObject);
-
   } else if (!req.file && !req.body.sauce) {
     const sauceObject = {}
     upload(sauceObject);
