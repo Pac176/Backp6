@@ -27,6 +27,13 @@ exports.createSauce = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
+
+  const sauce = await Sauce.findOne(({ _id: req.params.id }));
+  const filename = sauce.imageUrl.split("/images/")[1];
+  if(req.file){
+   fs.unlink(`images/${filename}`, () => {
+     console.log("Suppression fichier effectuée!");
+   })}
   const sauceObject = req.file
     ? {
         ...JSON.parse(req.body.sauce),
@@ -35,17 +42,20 @@ exports.modifySauce = async (req, res, next) => {
         }`,
       }
     : { ...req.body };
-  Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(httpStatus.OK).json({ message: 'Objet modifié!' }))
-    .catch(error => {
-      console.log(error.message)
-      res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-    })
+  
+  try {
+    await Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id });
+    res.status(httpStatus.OK).json({ message: 'Objet modifié!' })
+  } catch (error) {
+    console.log(error.message)
+    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
+  }
 };
 
 exports.deleteSauce = async (req, res, next) => {
   try {
     const sauce = await Sauce.findOne({ _id: req.params.id });
+  
     const filename = sauce.imageUrl.split("/images/")[1];
     fs.unlink(`images/${filename}`, async () => {
       try {
@@ -66,7 +76,7 @@ exports.deleteSauce = async (req, res, next) => {
 
 exports.getOneSauce = async (req, res, next) => {
   try {
-    const oneSauce = await Sauce.findOne();
+    const oneSauce = await Sauce.findOne({ _id: req.params.id });
     res.status(httpStatus.OK).json(oneSauce);
   } catch (error) {
     console.log(error.message);
