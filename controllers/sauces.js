@@ -1,8 +1,8 @@
-const Sauce = require("../models/sauce");
-const fs = require("fs");
-const httpStatus = require("http-status");
-const badRequestMessage = { message: "Requete non autorisée" };
-const internalServerErrorMessage = { message: "internal Server Error" };
+const Sauce = require('../models/sauce');
+const fs = require('fs');
+const httpStatus = require('http-status');
+const badRequestMessage = { message: 'Requete non autorisée' };
+const internalServerErrorMessage = { message: 'internal Server Error' };
 
 exports.createSauce = async (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
@@ -11,12 +11,12 @@ exports.createSauce = async (req, res, next) => {
   try {
     const sauce = new Sauce({
       ...sauceObject,
-      imageUrl: `${req.protocol}://${req.get("host")}/images/${
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${
         req.file.filename
-      }`,
+      }`
     });
     await sauce.save();
-    res.status(httpStatus.CREATED).json({ Message: "Objet enregistré !" });
+    res.status(httpStatus.CREATED).json({ Message: 'Objet enregistré !' });
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
     fs.unlink(`images/${req.file.filename}`, (err) => {
@@ -27,40 +27,85 @@ exports.createSauce = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
+  if (req.file && req.body.sauce) {
 
-  const sauce = await Sauce.findOne(({ _id: req.params.id }));
-  const filename = sauce.imageUrl.split("/images/")[1];
-  if(req.file){
-   fs.unlink(`images/${filename}`, () => {
-     console.log("Suppression fichier effectuée!");
-   })}
-  const sauceObject = req.file
-    ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          req.file.filename
-        }`,
-      }
-    : { ...req.body };
-  
-  try {
-    await Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id });
-    res.status(httpStatus.OK).json({ message: 'Objet modifié!' })
-  } catch (error) {
-    console.log(error.message)
-    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
+
+    const sauce = await Sauce.findOne({ _id: req.params.id });
+    const filename = sauce.imageUrl.split('/images/')[1];
+
+
+    fs.unlink(`images/${filename}`, () => {
+      console.log('Suppression fichier effectuée!');
+    });
+
+    const sauceObject = {
+      ...JSON.parse(req.body.sauce),
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${
+       req.file.filename
+     }`
+    };
+
+
+    await Sauce.updateOne(
+      { _id: req.params.id },
+      { ...sauceObject, _id: req.params.id }
+    );
+
+
+    res.status(httpStatus.OK).json({ message: 'Objet modifié!' });
+
+  } else if (req.file && !req.body.sauce)
+  {
+    const sauce = await Sauce.findOne({ _id: req.params.id });
+    const filename = sauce.imageUrl.split('/images/')[1];
+
+    fs.unlink(`images/${filename}`, () => {
+      console.log('Suppression fichier effectuée!');
+    });
+
+    const sauceObject = {
+      imageUrl: `${req.protocol}://${req.get('host')}/images/${
+       req.file.filename
+     }`
+    };
+
+    await Sauce.updateOne(
+      { _id: req.params.id },
+      { ...sauceObject, _id: req.params.id }
+    );
+
+    res.status(httpStatus.OK).json({ message: 'Objet modifié!' });
+
+  } else if (!req.file && req.body.sauce) {
+
+    const sauceObject = JSON.parse(req.body.sauce);
+
+    await Sauce.updateOne(
+      { _id: req.params.id },
+      { ...sauceObject, _id: req.params.id }
+    );
+
+    res.status(httpStatus.OK).json({ message: 'Objet modifié!' });
+
+  } else if (!req.file && !req.body.sauce) {
+    await Sauce.updateOne(
+      { _id: req.params.id },
+      { ...sauceObject, _id: req.params.id }
+    );
+
+    res.status(httpStatus.OK).json({ message: "Objet modifié!" });
   }
+
 };
 
 exports.deleteSauce = async (req, res, next) => {
   try {
     const sauce = await Sauce.findOne({ _id: req.params.id });
-  
-    const filename = sauce.imageUrl.split("/images/")[1];
+    const filename = sauce.imageUrl.split('/images/')[1];
     fs.unlink(`images/${filename}`, async () => {
       try {
         await Sauce.deleteOne({ _id: req.params.id });
-        res.status(httpStatus.OK).json({ Message: "Objet supprimé !" });
+        res.status(httpStatus.OK).json({ Message: 'Objet supprimé !' });
       } catch (error) {
         console.log(error);
         res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
@@ -76,7 +121,7 @@ exports.deleteSauce = async (req, res, next) => {
 
 exports.getOneSauce = async (req, res, next) => {
   try {
-    const oneSauce = await Sauce.findOne({ _id: req.params.id });
+    const oneSauce = await Sauce.findOne();
     res.status(httpStatus.OK).json(oneSauce);
   } catch (error) {
     console.log(error.message);
@@ -94,36 +139,36 @@ exports.getAllSauce = async (req, res, next) => {
 };
 
 exports.likeSauce = async (req, res, next) => {
-  const cancelOpinionMessage = { message: "Ton avis a bien été annulé" };
-  const successOpinionMessage = { message: "Ton avis a été pris en compte!" };
+  const cancelOpinionMessage = { message: 'Ton avis a bien été annulé' };
+  const successOpinionMessage = { message: 'Ton avis a été pris en compte!' };
   const fordiddenRepetitionMessage = {
-    message: "Vote deja pris en compte, annule ton vote pour changer",
+    message: 'Vote deja pris en compte, annule ton vote pour changer'
   };
   const pushDislike = { usersDisliked: req.body.userId };
   const pushLike = { usersLiked: req.body.userId };
 
-  function responseBadRequest(message) {
+  function responseBadRequest (message) {
     return res.status(httpStatus.BAD_REQUEST).json(message);
   }
   /* factorisation de la fonction addopinion */
-  function addOpinion(increment, likeOrDislike) {
+  function addOpinion (increment, likeOrDislike) {
     Sauce.updateOne(
       { _id: req.params.id },
       {
         $inc: increment,
-        $push: likeOrDislike,
+        $push: likeOrDislike
       }
     )
       .then(() => res.status(httpStatus.OK).json(successOpinionMessage))
       .catch(() => responseBadRequest(fordiddenRepetitionMessage));
   }
   /* factorisation de la fonction deleteopinion */
-  function deleteOpinion(increment, likeOrDislike) {
+  function deleteOpinion (increment, likeOrDislike) {
     Sauce.updateOne(
       { _id: req.params.id },
       {
         $inc: increment,
-        $pull: likeOrDislike,
+        $pull: likeOrDislike
       }
     )
       .then(() => res.status(httpStatus.OK).json(cancelOpinionMessage))
@@ -164,12 +209,12 @@ exports.likeSauce = async (req, res, next) => {
         }
         break;
       default:
-        console.log("Tentative de contournement de la requete like");
+        console.log('Tentative de contournement de la requete like');
         responseBadRequest(badRequestMessage);
         break;
     }
   } catch (error) {
-    console.log("Cannot get OneSauce", error);
+    console.log('Cannot get OneSauce', error);
     responseBadRequest(fordiddenRepetitionMessage);
   }
 };
