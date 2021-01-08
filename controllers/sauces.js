@@ -15,7 +15,7 @@ exports.createSauce = async (req, res, next) => {
         req.file.filename
       }`,
     });
-    await Sauce.save();
+    await sauce.save();
     res.status(httpStatus.CREATED).json({ Message: "Objet enregistré !" });
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
@@ -27,44 +27,20 @@ exports.createSauce = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
-  const sauce = await Sauce.findOne({ _id: req.params.id });
-  console.log(sauce)
-  const filename = sauce.imageUrl.split("/images/")[1];
-  console.log(filename)
-  try {
-    if (req.file) {
-      fs.unlink(`images/${filename}`, () => {
-        "Suppression fichier effectuée!";
-      });
-      const sauceObject = {
+  const sauceObject = req.file
+    ? {
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
-      };
-      await Sauce.updateOne(
-        { _id: req.params.id },
-        { ...sauceObject, _id: req.params.id }
-      );
-      res.status(httpStatus.OK).json({ Message: "Objet modifié !" });
-    } else {
-      const sauceObject = {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          filename
-        }`,
-      };
-      const sauce = await Sauce.updateOne(
-        { _id: req.params.id },
-        { ...sauceObject, _id: req.params.id }
-      );
-      console.log(sauce)
-      res.status(httpStatus.OK).json({ Message: "Objet modifié !" });
-    }
-  } catch (error) {
-    console.log(error.message);
-    res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-  }
+      }
+    : { ...req.body };
+  Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+    .then(() => res.status(httpStatus.OK).json({ message: 'Objet modifié!' }))
+    .catch(error => {
+      console.log(error.message)
+      res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
+    })
 };
 
 exports.deleteSauce = async (req, res, next) => {
