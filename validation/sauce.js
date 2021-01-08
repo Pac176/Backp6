@@ -3,8 +3,6 @@ const { EXPECTATION_FAILED } = require('http-status');
 const Joi = require('joi');
 const fs = require('fs');
 module.exports = async (req, res, next) => {
-
-  
   const sauce = req.body.sauce;
   const sauceObject = JSON.parse(sauce);
   const joiSchema = Joi.object({
@@ -22,7 +20,6 @@ module.exports = async (req, res, next) => {
   });
   try {
     const valid = await joiSchema.validateAsync(sauceObject, { abortEarly: false });
-    console.log(valid)
     next();
   } catch (error) {
     fs.unlink(`images/${req.file.filename}`, (err) => {
