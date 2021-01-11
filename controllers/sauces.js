@@ -29,7 +29,7 @@ exports.createSauce = async (req, res, next) => {
     res.status(httpStatus.CREATED).json({ Message: 'Objet enregistré !' });
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).json(badRequestMessage);
-    deleteImage(req.file.filename)
+    deleteImage(req.file.filename)/////refacto delete
   }
 };
 
