@@ -2,7 +2,6 @@ const Sauce = require('../models/sauce');
 const fs = require('fs');
 const httpStatus = require('http-status');
 const badRequestMessage = { message: 'Requete non autorisée' };
-const internalServerErrorMessage = { message: 'internal Server Error' };
 
 exports.createSauce = async (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
@@ -27,52 +26,65 @@ exports.createSauce = async (req, res, next) => {
 };
 
 exports.modifySauce = async (req, res, next) => {
-
-
-  async function upload(sauce) {
-    await Sauce.updateOne(
-      { _id: req.params.id },
-      { ...sauce, _id: req.params.id }
-    );
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Sauce et/ou image modifiées !" });
-  }
-  async function deleteImage() {
+ 
     const sauce = await Sauce.findOne({ _id: req.params.id });
-    const filename = sauce.imageUrl.split('/images/')[1];
-    fs.unlink(`images/${filename}`, () => {
-      console.log("Suppression fichier effectuée!");
-    });
-  }
-  if (req.file && req.body.sauce) {
-    const sauceObject = {
-      ...JSON.parse(req.body.sauce),
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${
-        req.file.filename
-      }`
-    };
-    upload(sauceObject)
-    deleteImage()
-  } else if (req.file && !req.body.sauce)
-  {
-    const sauceObject = {
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${
-        req.file.filename
-      }`
-    };
-    upload(sauceObject);
-    deleteImage()
+    const filename = sauce.imageUrl.split("/images/")[1];
 
-  } else if (!req.file && req.body.sauce) {
-    const sauceObject = JSON.parse(req.body.sauce);
-    upload(sauceObject);
-
-  } else if (!req.file && !req.body.sauce) {
-    const sauceObject = {}
-    upload(sauceObject);
-  }
-
+    async function upload(sauce) {
+      try {
+        await Sauce.updateOne(
+          { _id: req.params.id },
+          { ...sauce, _id: req.params.id }
+        );
+        res
+          .status(httpStatus.OK)
+          .json({ message: "Sauce et/ou image modifiées !" });
+      } catch (error) {
+        deleteImage(req.file.filename); /// ////////pas de creation de fichier avant?
+        console.log(error.message);
+        res
+          .status(httpStatus.INTERNAL_SERVER_ERROR)
+          .json({ error: "erreure function upload" });
+      }
+    }
+    async function deleteImage(image) {
+    try {
+        fs.unlink(`images/${image}`, () => {
+          console.log("Fichier non supprimé");
+        });
+    } catch (error) {
+      console.log(error.message)
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error: 'Echec Suppression fichier' });
+    }
+    }
+    
+    if (req.file && req.body.sauce) {
+      const sauceObject = { 
+        ...JSON.parse(req.body.sauce),
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${
+          req.file.filename
+        }`,
+      };
+      upload(sauceObject);
+      deleteImage(filename);
+    } else if (req.file && !req.body.sauce) {
+      const sauceObject = {
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${
+          req.file.filename
+        }`,
+      };
+      upload(sauceObject);
+      deleteImage(filename);
+    } else if (!req.file && req.body.sauce) {
+      const sauceObject = JSON.parse(req.body.sauce);
+      upload(sauceObject);
+    } else if (!req.file && !req.body.sauce) {
+      const sauceObject = {};
+      upload(sauceObject);
+    }
+  
 };
 
 exports.deleteSauce = async (req, res, next) => {
@@ -92,8 +104,8 @@ exports.deleteSauce = async (req, res, next) => {
     console.log(error.message);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json(internalServerErrorMessage);
-  }
+      .json({ error: 'erreure fonction deleteSauce' });
+  }rorMessag;
 };
 
 exports.getOneSauce = async (req, res, next) => {
