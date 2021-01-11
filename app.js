@@ -6,6 +6,11 @@ const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
 require("dotenv").config();
+const helmet = require("helmet");
+
+
+
+
 
 
 mongoose.connect(process.env.DB_CONNECT, {
@@ -25,6 +30,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+app.use(helmet());
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
