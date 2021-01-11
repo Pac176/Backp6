@@ -6,11 +6,11 @@ module.exports = async (req, res, next) => {
   const sauce = req.body.sauce;
   const sauceObject = JSON.parse(sauce);
   const joiSchema = Joi.object({
-    userId: Joi.string().alphanum().min(5).required(),
+    userId: Joi.string().alphanum().required(),
     name: Joi.string().max(12).required(),
-    manufacturer: Joi.string().regex(/manufacturer/).required(),
-    description: Joi.string().min(15).required(),
-    mainPepper: Joi.string().min(15).required(),
+    manufacturer: Joi.string().required(),
+    description: Joi.string().required(),
+    mainPepper: Joi.string().required(),
     imageUrl: Joi.string(),
     heat: Joi.number().required(),
     likes: Joi.number().default(0), // { type: Number, required: false, default: 0 },
