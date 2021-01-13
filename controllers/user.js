@@ -19,10 +19,14 @@ exports.signup = async (req, res, next) => {
         .status(httpStatus.CREATED)
         .json({ message: 'Utilisateur créé !' });
     } catch (error) {
-      res.status(httpStatus.EXPECTATION_FAILED).json({ error });
+      res
+        .status(httpStatus.EXPECTATION_FAILED)
+        .json({ error });
     }
   } catch (error) {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error });
   }
 };
 
@@ -30,7 +34,9 @@ exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(httpStatus.UNAUTHORIZED).json({ error: 'Utilisateur non trouvé !' });
+      return res
+        .status(httpStatus.UNAUTHORIZED)
+        .json({ error: 'Utilisateur non trouvé !' });
     }
     try {
       const valid = await bcrypt.compare(req.body.password, user.password);
@@ -39,16 +45,22 @@ exports.login = async (req, res, next) => {
           .status(httpStatus.UNAUTHORIZED)
           .json({ error: 'Mot de passe incorrect !' });
       }
-      res.status(httpStatus.OK).json({
-        userId: user._id,
-        token: jwt.sign({ userId: user._id }, 'RANDOM_TOKEN_SECRET', {
-          expiresIn: '24h'
-        })
-      });
+      res
+        .status(httpStatus.OK)
+        .json({
+          userId: user._id,
+          token: jwt.sign({ userId: user._id }, 'RANDOM_TOKEN_SECRET', {
+            expiresIn: '24h'
+          })
+        });
     } catch (error) {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error });
     }
   } catch (error) {
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error });
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ error });
   }
 };

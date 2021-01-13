@@ -15,6 +15,7 @@ module.exports = {
     'vue'
   ],
   rules: {
-    semi: ['error', 'always', { omitLastInOneLineBlock: true }]
+    "semi": ['error', 'always', { omitLastInOneLineBlock: true }],
+    "no-useless-escape":['off']
   }
 };
