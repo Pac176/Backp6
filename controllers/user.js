@@ -5,8 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 exports.signup = async (req, res, next) => {
-  /* Hashage et salage du mot de passe grace a bcrypt */
-  try {
+   try {
     const hash = await bcrypt.hash(req.body.password, 10);
     const user = new User({
       email: req.body.email,

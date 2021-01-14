@@ -14,10 +14,10 @@ exports.validSauce = async (req, res, next) => {
       mainPepper: Joi.string().required(),
       imageUrl: Joi.string(),
       heat: Joi.number().required(),
-      likes: Joi.number().default(0), // { type: Number, required: false, default: 0 },
-      dislikes: Joi.number().default(0), // { type: Number, required: false, default: 0 },
-      usersLiked: Joi.array(), // [{ type: String, required: false }],
-      usersDisliked: Joi.array(), // [{ type: String, required: false }],
+      likes: Joi.number().default(0), 
+      dislikes: Joi.number().default(0), 
+      usersLiked: Joi.array(), 
+      usersDisliked: Joi.array(), 
     });
     try {
       await joiSchema.validateAsync(sauceObject, {

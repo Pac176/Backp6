@@ -15,6 +15,7 @@ exports.userSignupValidation = async (req, res, next) => {
     });
     next();
   } catch (error) {
+    console.log(error)
     const errorMessage = [];
     console.log(error.annotate());
     error.details.forEach((element) => {
@@ -40,6 +41,7 @@ exports.userLoginValidation = async (req, res, next) => {
     });
     next();
   } catch (error) {
+    console.log(error)
     res.status(httpStatus.IM_A_TEAPOT).json({
       message:
           'Take a cup of tea and try again'
