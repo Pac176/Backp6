@@ -9,7 +9,7 @@ require('dotenv').config();
 const helmet = require('helmet');
 
 
-mongoose.connect(process.env.DB_CONNECT_ADMIN, {
+mongoose.connect(process.env.DB_CONNECT_USER, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
