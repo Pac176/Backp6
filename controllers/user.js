@@ -18,11 +18,13 @@ exports.signup = async (req, res, next) => {
         .status(httpStatus.CREATED)
         .json({ message: 'Utilisateur créé !' });
     } catch (error) {
+      console.log(error);
       res
         .status(httpStatus.EXPECTATION_FAILED)
         .json({ error });
     }
-  } catch (error) {
+   } catch (error) {
+     console.log(error);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ error });
@@ -53,11 +55,13 @@ exports.login = async (req, res, next) => {
           })
         });
     } catch (error) {
+      console.log(error);
       res
         .status(httpStatus.INTERNAL_SERVER_ERROR)
         .json({ error });
     }
   } catch (error) {
+    console.log(error);
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json({ error });

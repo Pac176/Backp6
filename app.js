@@ -5,17 +5,17 @@ const userRoutes = require('./routes/user');
 const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
-require("dotenv").config();
-const helmet = require("helmet");
+require('dotenv').config();
+const helmet = require('helmet');
 
 
-mongoose.connect(process.env.DB_CONNECT_USER, {
+mongoose.connect(process.env.DB_CONNECT_ADMIN, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch(() => console.log("Connexion à MongoDB échouée !"));
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

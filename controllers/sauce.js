@@ -51,6 +51,7 @@ exports.createSauce = async (req, res, next) => {
     await newSauce.save();
     res.status(httpStatus.CREATED).json({ Message: 'Objet enregistré !' });
   } catch (error) {
+    console.log(error);
     responseBadRequest(res, badRequestMessage);
     deleteImage(res, req.file.filename);
   }
@@ -85,7 +86,7 @@ exports.deleteSauce = async (req, res, next) => {
         .status(httpStatus.OK)
         .json({ Message: 'Objet supprimé !' });
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       responseBadRequest(res, badRequestMessage);
     }
   } catch (error) {
