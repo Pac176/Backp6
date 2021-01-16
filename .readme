@@ -1,0 +1,18 @@
+
+FRONT
+
+1.cloner le front piquante:  https://github.com/OpenClassrooms-Student-Center/dwj-projet6.git
+
+2. taper la commande npm i
+
+3. a l'aide du terminal, lancer le server en tapant "npm start"
+
+BACK
+
+1.Creer un fichier ".env", y coller les URI de connection mongodb fournies avec le livrable pour avoir un resultat similaire au fichier .env.dist
+
+2.taper "npm i"
+
+3.lancer le serveur node en tapant "nodemon start" (nodemon est utilisé pour une mise a jour automatique des changements opérés dans le code)
+
+4.l'appli est operationnelle
